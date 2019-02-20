@@ -32,18 +32,100 @@ window.addEventListener('DOMContentLoaded', () => {
                 empty = cartWrapper.querySelector('.empty');
             
             trigger.remove(); // удаляем кнопку "добавить в корзину"
+            showConfirm(); // запускаем анимацию корзины!
+            calcGoods(1); // запускаем подсчет товара в корзине!
             removeBtn.classList.add('goods__item-remove'); // добавляем кнопку
                                                         // удаление с крестиком
             removeBtn.innerHTML = '&times'; //сам крестик
             item.appendChild(removeBtn); //добавляем кнопку к карточке
             cartWrapper.appendChild(item); //добавляем карточку в корзину!!!
-            
-            if(empty){
-                empty.remove(); //удаляем блок с надписью "корзина пустая"
-            }
+            // вызываем тут, когда уже все карточки ушли в корзину!
+            calcTotal(); // подсчитываем сумму покупок в корзине!
+            removeFromCart(); // удаление товара из корзины!
         });
     });
-});
-
 // Домашнее задание: Запушить данный код на GitHub!!! И отправить ссылку на него
 // в комментариях в группе вк!!!
+    function sliceTitle(){
+        titles.forEach(function(item){
+        // перебираем заголовки
+            if(item.textContent.length < 70){
+                // символы в строке загаловка (описания товара)
+                return;
+            } else {
+                // обрезаем загаловок и добавляем ... в конец
+                const str = item.textContent.slice(0, 71) + '...';
+                // 71 так как .slice не включает последнее число!!!
+                item.textContent = str;
+                // подставляем наш обрезанный текст обратно
+            }
+        });
+    }
+    sliceTitle();
+
+    function showConfirm(){
+        // добавляем корзину на страницу
+        confirm.style.display = 'block';
+        let counter = 100;
+        const id = setInterval(frame, 10);
+        // анимируем корзину при прокрутки страницы
+        function frame(){
+            if (counter == 10){
+                clearInterval(id);
+                confirm.style.display = 'none';
+                // останавливаем анимацию если счетчик равен 10
+            } else {
+                counter--;
+                // сдвигаем корзину
+                confirm.style.transform = `translateY(-${counter}px)`;
+                confirm.style.opacity = '.' + counter;
+            }
+        }
+    }
+    
+    function calcGoods(i){
+        // подсчитываем кол-во товаров в корзине
+        const items = cartWrapper.querySelectorAll('.goods__item');
+        // добавляем число на баджик
+        badge.textContent = items.length + i;
+        // i добавляем для универсальности!
+        let empty = cartWrapper.querySelector('.empty');
+        if(items.length == 0){
+            // проверяем, если баджик равен 0, то показываем блок "Ваша корзина пока пуста"
+            empty.style.display = 'block';
+        } else {
+            // если баджик не равен 0, то убираем блок "Ваша корзина пока пуста"
+            empty.style.display = 'none';
+        }
+    }
+
+    function calcTotal(){
+        // подсчитываем стоимость товаров в корзине
+        const prices = document.querySelectorAll('.cart__wrapper > .goods__item > .goods__price > span');
+        let total = 0; // изначальная стоимость
+        prices.forEach(function(item){
+            // +item - преобразует строку в число!!!
+            total += +item.textContent;
+        });
+        // записываем наше значение в корзину
+        totalCost.textContent = total;
+    }
+
+    function removeFromCart(){
+        // удаляем товар из корзины
+        const removeBtn = cartWrapper.querySelectorAll('.goods__item-remove');
+        removeBtn.forEach(function(btn){
+            // перебираем кнопки с крестиком в корзине
+            btn.addEventListener('click', () => {
+                // удаляем родительский элемент иконки с крестиком
+                btn.parentElement.remove();
+                // пересчитываем количество товаров на корзине
+                calcGoods(0);
+                // пересчитываем сумму товаров в корзине
+                calcTotal();
+            });
+        });
+    }
+    // Домашнее задание: вернуть надписть что корзина пуста, когда все товары удалениы
+    // из корзины с помощью креcтика!!!!
+});
